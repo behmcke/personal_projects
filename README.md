@@ -7,16 +7,21 @@ My roommates and I have a board game where your movement on the board depends on
 Higher sums are always better. The minimum value to avoid a penalty changes for each turn.
 
 The following configurations are available:
+
 Base Configurations:
 - 6-Sided Die: Roll 3 die. Sum all values.
-Level 1 Configuration:
-- 6-Sided Die:            Roll 4 die. Sum 3 highest values.
-- 10-Sided Die:           Roll 2 die. Sum all values.
-- 20-Sided Die:           Roll 1 die. = rolled value.
-Level 2 Configuration:
+
+Level 1 Configurations:
+* 6-Sided Die:            Roll 4 die. Sum 3 highest values.
+* 10-Sided Die:           Roll 2 die. Sum all values.
+* 20-Sided Die:           Roll 1 die. = rolled value.
+
+Level 2 Configurations:
 - 6-Sided Die:            Roll 5 die. Sum 3 highest values.
 - 10-Sided Die:           Roll 3 die. Sum 2 highest values.
 - 20-Sided Die:           Roll 2 die. Retain highest value.
+
+Level 3 Configurations:
 - 6-Sided Die:            Roll 6 die. Sum 3 highest values.
 - 10-Sided Die:           Roll 4 die. Sum 2 highest values.
 - 20-Sided Die:           Roll 3 die. Retain highest value.
