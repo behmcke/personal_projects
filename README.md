@@ -33,6 +33,6 @@ This script produces a probability table to determine how likely I am to receive
 It's been a big success. :)
 
 # Confidence Interval Sim
-This is a simulation I made to show how confidence intervals change for each sample. I took 20 samples (n=30) and calculated the confidence interval for each. I plotted the histgoram of data with markers for the CI as well as the population proportion to show how placement of \mu changes within the intervals.
+This is a simulation I made to show how confidence intervals change for each sample. I took 20 samples (n=30) and calculated the confidence interval for each. I plotted a relative frequency histogram of sampled values with markers for the CI as well as the population proportion to show how placement of \mu changes within the intervals.
 
-This was an exercise I made for the recitation I lead, but ultimately didn't use. The course I work with is an elementary stats course, and I got carried away creating this exercise a bit above the class level.
+This was an exercise I made for the recitation I lead, but ultimately I didn't use it. The course I work with is an elementary stats course, and I got carried away creating this exercise a bit above the class level.
