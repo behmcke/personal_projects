@@ -1,5 +1,5 @@
 # personal_projects
-Projects I've Done for my Own Reference and Practice
+Projects I've done for my own reference and practice
 
 # Dice Experiment
 My roommates and I have a board game where your movement on the board depends on the sum you are able to roll with a die configuration you choose.
