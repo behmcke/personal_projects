@@ -12,19 +12,19 @@ Base Configurations:
 - 6-Sided Die: Roll 3 die. Sum all values.
 
 Level 1 Configurations:
-* 6-Sided Die // Roll 4 die. // Sum 3 highest values.
-* 10-Sided Die:           Roll 2 die. Sum all values.
-* 20-Sided Die:           Roll 1 die. = rolled value.
+* 6-Sided Die // Roll 4 die // Sum 3 highest values
+* 10-Sided Die // Roll 2 die // Sum all values
+* 20-Sided Die // Roll 1 die // Keep rolled value
 
 Level 2 Configurations:
-- 6-Sided Die:            Roll 5 die. Sum 3 highest values.
-- 10-Sided Die:           Roll 3 die. Sum 2 highest values.
-- 20-Sided Die:           Roll 2 die. Retain highest value.
+- 6-Sided Die // Roll 5 die // Sum 3 highest values
+- 10-Sided Die // Roll 3 die // Sum 2 highest values
+- 20-Sided Die // Roll 2 die // Retain highest value
 
 Level 3 Configurations:
-- 6-Sided Die:            Roll 6 die. Sum 3 highest values.
-- 10-Sided Die:           Roll 4 die. Sum 2 highest values.
-- 20-Sided Die:           Roll 3 die. Retain highest value.
+- 6-Sided Die // Roll 6 die // Sum 3 highest values
+- 10-Sided Die // Roll 4 die // Sum 2 highest values
+- 20-Sided Die // Roll 3 die // Retain highest value
 
 Any configuration above the base configuration requires purchase in the game. Configurations of the same level have the same cost.
 
