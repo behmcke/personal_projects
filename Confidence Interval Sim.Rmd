@@ -1,0 +1,64 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+# /////////////////////////////////////////////////////////////////////////////
+# Demonstration of Confidence Intervals
+#
+# Script simulates twenty samples (n=30) attempting to produce a confidence
+# interval for the population proportion, when the population belongs to a 
+# normal distribution, N(.5, .22).
+# 
+# Twenty plots are produced, one for each sample, showing a histogram of
+# the randomly sampled proportions, a blue line at the population proportion,
+# and red lines at the bounds of 95% confidence interval based on \hat{p}.
+# 
+# The population pdf is plotted above the histogram in each facet pane.
+#
+# Intended Audience: Those already familiar with statistics and simulation.
+#
+# ////////////////////////////////////////////////////////////////////////////
+
+# load packages
+pacman::p_load(dplyr,
+               ggplot2)
+
+# set seed for same random results each time
+set.seed(2234)
+
+# dataframe of random numbers assigned to 1 of 20 groups
+x <- data.frame("rand" = c(rnorm(600, mean = .5, sd = .22)),
+                "graph_num" = c(rep(1:20,30))
+                )
+
+# summary plot
+x_plot <- x %>%
+  group_by(graph_num) %>%                                 # separate groups
+  summarise(p_hat = mean(rand)) %>%                       # find avg p for each group
+  mutate(se = 1.96*sqrt(p_hat*(1-p_hat)/60),              # calculate standard error
+         lb = p_hat - se,                                 # lower bounds
+         ub = p_hat + se)                                 # upper bounds
+
+# plot results
+ggplot(x, aes(x = rand, group = graph_num)) + 
+  geom_function(fun = dnorm,                              # plot true pdf
+                args = list(mean = .5, sd = .22)) +
+  xlim(c(0,1)) +
+  geom_vline(x_plot,                                      # plot mu in blue
+             mapping = aes(xintercept = .5), 
+             col = "blue")+
+  geom_vline(x_plot,                                      # plot lower bound
+             mapping = aes(xintercept = lb), 
+             col = "red") +
+  geom_vline(x_plot,                                      # plot upper bound
+             mapping = aes(xintercept = ub), 
+             col = "red") +
+  geom_histogram(aes(y = stat(count) / 30,                # histogram of random values
+                     alpha = .5), 
+                 binwidth = .1,
+                 fill = "aquamarine4") +
+  facet_wrap(vars(graph_num))                             # plot for each iteration
+```
+
