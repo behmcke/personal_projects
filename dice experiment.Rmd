@@ -1,0 +1,621 @@
+---
+title: "Dice Tables"
+author: "Betsy Ehmcke"
+date: "10/5/2021"
+output: html_document
+---
+
+```{r}
+# /////////////////////////////////////////////////////////////////////////////
+# Introduction
+# /////////////////////////////////////////////////////////////////////////////
+# My roommates and I have a board game where your movement on the board depends
+# on the sum you are able to roll with a die configuration you choose.
+#
+# Higher sums are always better. The minimum value to avoid a penalty changes 
+# for each turn.
+# 
+# The following configurations are available:
+#   Base Configurations:
+#       6-Sided Die: Roll 3 die. Sum all values.
+#   Level 1 Configuration:
+#       6-Sided Die:            Roll 4 die. Sum 3 highest values.
+#       10-Sided Die:           Roll 2 die. Sum all values.
+#       20-Sided Die:           Roll 1 die. = rolled value.
+#   Level 2 Configuration:
+#       6-Sided Die:            Roll 5 die. Sum 3 highest values.
+#       10-Sided Die:           Roll 3 die. Sum 2 highest values.
+#       20-Sided Die:           Roll 2 die. Retain highest value.
+#   Level 3 Configuration:
+#       6-Sided Die:            Roll 6 die. Sum 3 highest values.
+#       10-Sided Die:           Roll 4 die. Sum 2 highest values.
+#       20-Sided Die:           Roll 3 die. Retain highest value.
+#
+# Any configuration above the base configuration requires purchase in the game.
+# Configurations of the same level have the same cost.
+# 
+# This script produces a probability table to determine how likely I am to
+# receive a desired minimum roll value with each purchased dice configuration.
+#
+# /////////////////////////////////////////////////////////////////////////////
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(dplyr,
+               ggplot2,
+               knitr,
+               patchwork)
+```
+
+```{r max roll 4}
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Four 6-Sided Die and Add Highest Three
+# /////////////////////////////////////////////////////////////////////////////
+
+# dataframe of all possible rolls
+d6_4 <- data.frame(
+  "Value_1" = c(                                       # 1st die
+    rep(1, 216),
+    rep(2, 216),
+    rep(3, 216),
+    rep(4, 216),
+    rep(5, 216),
+    rep(6, 216)
+  ),
+  "Value_2" = c(rep(c(                                 # 2nd die
+    rep(1, 36),
+    rep(2, 36),
+    rep(3, 36),
+    rep(4, 36),
+    rep(5, 36),
+    rep(6, 36)
+  ), 6)),
+  "Value_3" = c(rep(c(                                 # 3rd die
+    rep(1, 6),
+    rep(2, 6),
+    rep(3, 6),
+    rep(4, 6),
+    rep(5, 6),
+    rep(6, 6)
+  ), 36)),
+  "Value_4" = c(rep(c(1, 2, 3, 4, 5, 6), 36))          # 4th die
+)
+
+# probability table
+d6_4_pmf <- d6_4 %>%                                   
+  mutate(
+    DropDie = pmin(Value_1,                            # lowest number dropped
+                   Value_2, 
+                   Value_3, 
+                   Value_4),
+    Total = Value_1 + Value_2 + Value_3 + Value_4 - DropDie #add total
+  ) %>%
+  group_by(Total) %>%                                  # group resulting die sum
+  summarise(Odds = n()) %>%                            # count options for result
+  mutate(Probability = Odds / 1296) %>%                # probability of result
+  select(-Odds)                                        # format
+
+# plot probability
+d6_4_plot <-
+  ggplot(data = d6_4_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "blue4") +
+  xlim(c(1, 20)) +
+  ylim(c(0, .2))
+
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Two 10-Sided Die
+# /////////////////////////////////////////////////////////////////////////////
+
+d10_2 <- data.frame(
+  "Value_1" = c(                                       # 1st die
+    rep(1, 10),
+    rep(2, 10),
+    rep(3, 10),
+    rep(4, 10),
+    rep(5, 10),
+    rep(6, 10),
+    rep(7, 10),
+    rep(8, 10),
+    rep(9, 10),
+    rep(10, 10)
+  ),
+  "Value_2" = c(rep(c(                                 # 2nd die
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  ), 10))
+)
+
+# probability table
+d10_2_pmf <- d10_2 %>%
+  mutate(Total = Value_1 + Value_2) %>%                # both rolls added
+  group_by(Total) %>%                                  # group resulting sum
+  summarise(Odds = n()) %>%                            # count options for result
+  mutate(Probability = Odds / 100) %>%                 # probability of result
+  select(-Odds)                                        # format
+
+# plot probability
+d10_2_plot <-
+  ggplot(data = d10_2_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "purple4") +
+  ylim(c(0, .2))
+
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll One 20-Sided Die
+# /////////////////////////////////////////////////////////////////////////////
+
+d20_1_pmf <- data.frame(Total = c(1:20)) %>%           # option to roll 1-20
+  mutate(Odds = 1,                                     # equal odds for all rolls
+         Probability = Odds / 20) %>%                  # probability of result
+  select(-Odds)                                        # format
+
+# plot probability
+d20_1_plot <-
+  ggplot(data = d20_1_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "green4") +
+  ylim(c(0, .2))
+
+# view plots
+d6_4_plot / d10_2_plot / d20_1_plot
+```
+
+```{r max roll 5}
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Five 6-Sided Die and Add Highest Three
+# /////////////////////////////////////////////////////////////////////////////
+
+# all possible rolls
+d6_5 <- data.frame(
+  "Value_1" = c(                                            # 1st die
+    rep(1, 1296),
+    rep(2, 1296),
+    rep(3, 1296),
+    rep(4, 1296),
+    rep(5, 1296),
+    rep(6, 1296)
+  ),
+  "Value_2" = c(rep(c(                                      # 2nd die
+    rep(1, 216),
+    rep(2, 216),
+    rep(3, 216),
+    rep(4, 216),
+    rep(5, 216),
+    rep(6, 216)
+  ), 6)),
+  "Value_3" = c(rep(c(                                      # 3rd die
+    rep(1, 36),
+    rep(2, 36),
+    rep(3, 36),
+    rep(4, 36),
+    rep(5, 36),
+    rep(6, 36)
+  ), 36)),
+  "Value_4" = c(rep(c(                                     # 4th die
+    rep(1, 6),
+    rep(2, 6),
+    rep(3, 6),
+    rep(4, 6),
+    rep(5, 6),
+    rep(6, 6)
+  ), 216)),
+  "Value_5" = c(rep(c(1, 2, 3, 4, 5, 6), 1296))            # 5th die
+)
+
+# probability table
+d6_5pmf <- d6_5 %>%
+  rowwise() %>%                                            # needed for sort
+  mutate(
+    DropDie1 = sort(c(                                     # sort die values
+      Value_1, Value_2, Value_3, Value_4, Value_5
+    ), decreasing = FALSE)[1],                             # store lowest value
+    DropDie2 = sort(c(
+      Value_1, Value_2, Value_3, Value_4, Value_5
+    ), decreasing = FALSE)[2],                             # store 2nd lowest value
+    Total = Value_1 + Value_2 + Value_3 + Value_4 + Value_5 - DropDie1 - DropDie2
+  ) %>%                                                    # add values subtract stored lowest
+  group_by(Total) %>%                                      # group by resulting sum
+  summarise(Odds = n()) %>%                                # count result options
+  mutate(Probability = Odds / 7776) %>%                    # probability of result
+  select(-Odds)                                            # format
+
+# plot probability
+d6_5_plot <-
+  ggplot(data = d6_5pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "blue4") +
+  xlim(c(1, 20)) +
+  ylim(c(0, .2))
+
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Three 10-Sided Die and Add Highest Two
+# /////////////////////////////////////////////////////////////////////////////
+
+# all possible die values
+d10_3 <- data.frame(
+  "Value_1" = c(                                           # 1st die
+    rep(1, 100),
+    rep(2, 100),
+    rep(3, 100),
+    rep(4, 100),
+    rep(5, 100),
+    rep(6, 100),
+    rep(7, 100),
+    rep(8, 100),
+    rep(9, 100),
+    rep(10, 100)
+  ),
+  "Value_2" = rep(c(                                       # 2nd die
+    rep(1, 10),
+    rep(2, 10),
+    rep(3, 10),
+    rep(4, 10),
+    rep(5, 10),
+    rep(6, 10),
+    rep(7, 10),
+    rep(8, 10),
+    rep(9, 10),
+    rep(10, 10)
+  ), 10),                                                  # 3rd die
+  "Value_3" = c(rep(c(
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  ), 100))
+)
+
+# probability table
+d10_3_pmf <- d10_3 %>%
+  mutate(
+    DropDie = pmin(Value_1, Value_2, Value_3),             # store lowest value
+    Total = Value_1 + Value_2 + Value_3 - DropDie          # add values drop lowest
+  ) %>%
+  group_by(Total) %>%                                      # group by resulting sum
+  summarise(Odds = n()) %>%                                # count result options
+  mutate(Probability = Odds / 1000) %>%                    # probability of result
+  select(-Odds)                                            # format
+
+# plot probability
+d10_3_plot <-
+  ggplot(data = d10_3_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "purple4") +
+  ylim(c(0, .2))
+
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Two 20-Sided Die and Keep Highest
+# /////////////////////////////////////////////////////////////////////////////
+
+# all possible die values
+d20_2 <- data.frame(
+  "Value_1" = c(                                           # 1st die
+    rep(1, 20),
+    rep(2, 20),
+    rep(3, 20),
+    rep(4, 20),
+    rep(5, 20),
+    rep(6, 20),
+    rep(7, 20),
+    rep(8, 20),
+    rep(9, 20),
+    rep(10, 20),
+    rep(11, 20),
+    rep(12, 20),
+    rep(13, 20),
+    rep(14, 20),
+    rep(15, 20),
+    rep(16, 20),
+    rep(17, 20),
+    rep(18, 20),
+    rep(19, 20),
+    rep(20, 20)
+  ),
+  "Value_2" = c(rep(1:20, 20))                            # 2nd die
+)
+
+# probability table
+d20_2_pmf <- d20_2 %>%
+  rowwise() %>%                                           # needed for sort
+  mutate(DropDie = sort(c(Value_1, Value_2),              # sort die values
+                        decreasing = FALSE)[1],           # store lowest value
+         Total = Value_1 + Value_2 - DropDie) %>%         # add values drop lowest
+  group_by(Total) %>%                                     # group by resulting sums
+  summarise(Odds = n()) %>%                               # count result options
+  mutate(Probability = Odds / 400) %>%                    # probability of result
+  select(-Odds)                                           # format
+
+# plot probability
+d20_2_plot <-
+  ggplot(data = d20_2_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "green4") +
+  ylim(c(0, .2))
+
+# view plots
+d6_5_plot / d10_3_plot / d20_2_plot
+```
+
+```{r max roll 6}
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Six 6-Sided Die and Add Highest Three
+# /////////////////////////////////////////////////////////////////////////////
+
+# all possible rolls
+d6_6 <- data.frame(
+  "Value_1" = c(                                          # 1st die
+    rep(1, 7776),
+    rep(2, 7776),
+    rep(3, 7776),
+    rep(4, 7776),
+    rep(5, 7776),
+    rep(6, 7776)
+  ),
+  "Value_2" = c(rep(c(                                    # 2nd die
+    rep(1, 1296),
+    rep(2, 1296),
+    rep(3, 1296),
+    rep(4, 1296),
+    rep(5, 1296),
+    rep(6, 1296)
+  ), 6)),
+  "Value_3" = c(rep(c(                                    # 3rd die
+    rep(1, 216),
+    rep(2, 216),
+    rep(3, 216),
+    rep(4, 216),
+    rep(5, 216),
+    rep(6, 216)
+  ), 36)),
+  "Value_4" = c(rep(c(                                    # 4th die
+    rep(1, 36),
+    rep(2, 36),
+    rep(3, 36),
+    rep(4, 36),
+    rep(5, 36),
+    rep(6, 36)
+  ), 216)),
+  "Value_5" = c(rep(c(                                    # 5th die
+    rep(1, 6),
+    rep(2, 6),
+    rep(3, 6),
+    rep(4, 6),
+    rep(5, 6),
+    rep(6, 6)
+  ), 1296)),
+  "Value_6" = c(rep(c(1, 2, 3, 4, 5, 6), 7776))           # 6th die
+)
+
+# probability table
+d6_6pmf <- d6_6 %>%
+  rowwise() %>%                                           # needed for sort
+  mutate(
+    DropDie1 = sort(                                      # sort die values
+      c(Value_1, Value_2, Value_3, Value_4, Value_5, Value_6),
+      decreasing = FALSE                                  # retain lowest
+    )[1],
+    DropDie2 = sort(
+      c(Value_1, Value_2, Value_3, Value_4, Value_5, Value_6),
+      decreasing = FALSE
+    )[2],                                                 # retain 2nd lowest
+    DropDie3 = sort(
+      c(Value_1, Value_2, Value_3, Value_4, Value_5, Value_6),
+      decreasing = FALSE
+    )[3],                                                 # retain 3rd lowest
+    Total = Value_1 + Value_2 + Value_3 + Value_4 + Value_5 + Value_6 - DropDie1 - DropDie2 - DropDie3
+  ) %>%                                                   # add die values subtract 3 lowest
+  group_by(Total) %>%                                     # group by resulting sum
+  summarise(Odds = n()) %>%                               # count result options
+  mutate(Probability = Odds / 46656) %>%                  # probability of result
+  select(-Odds)                                           # format
+
+# plot probability
+d6_6_plot <-
+  ggplot(data = d6_6pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "blue4") +
+  xlim(c(1, 20)) +
+  ylim(c(0, .2))
+
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Four 10-Sided Die and Add Highest Two
+# /////////////////////////////////////////////////////////////////////////////
+
+# plot all possible rolls
+d10_4 <- data.frame(
+  "Value_1" = c(                                          # 1st die
+    rep(1, 1000),
+    rep(2, 1000),
+    rep(3, 1000),
+    rep(4, 1000),
+    rep(5, 1000),
+    rep(6, 1000),
+    rep(7, 1000),
+    rep(8, 1000),
+    rep(9, 1000),
+    rep(10, 1000)
+  ),
+  "Value_2" = rep(c(                                      # 2nd die
+    rep(1, 100),
+    rep(2, 100),
+    rep(3, 100),
+    rep(4, 100),
+    rep(5, 100),
+    rep(6, 100),
+    rep(7, 100),
+    rep(8, 100),
+    rep(9, 100),
+    rep(10, 100)
+  ), 10),
+  "Value_3" = rep(c(                                      # 3rd die
+    rep(1, 10),
+    rep(2, 10),
+    rep(3, 10),
+    rep(4, 10),
+    rep(5, 10),
+    rep(6, 10),
+    rep(7, 10),
+    rep(8, 10),
+    rep(9, 10),
+    rep(10, 10)
+  ), 100),
+  "Value_4" = c(rep(c(                                    # 4th die
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  ), 1000))
+)
+
+# probability table
+d10_4_pmf <- d10_4 %>%
+  rowwise() %>%                                           # needed for sort
+  mutate(
+    DropDie1 = sort(c(Value_1, Value_2, Value_3, Value_4), # sort die values
+                    decreasing = FALSE)[1],               # retain lowest
+    DropDie2 = sort(c(Value_1, Value_2, Value_3, Value_4), 
+                    decreasing = FALSE)[2],               # retain 2nd lowest
+    Total = Value_1 + Value_2 + Value_3 + Value_4 - DropDie1 - DropDie2
+  ) %>%                                                   # add values subtract lowest
+  group_by(Total) %>%                                     # group by resulting sums
+  summarise(Odds = n()) %>%                               # count result options
+  mutate(Probability = Odds / 10000) %>%                  # probability of result
+  select(-Odds)                                           # format
+
+# plot probability 
+d10_4_plot <-
+  ggplot(data = d10_4_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "purple4") +
+  ylim(c(0, .2))
+
+# /////////////////////////////////////////////////////////////////////////////
+# Option to Roll Three 20-Sided Die and Keep Highest One
+# /////////////////////////////////////////////////////////////////////////////
+
+# all possible rolls
+d20_3 <- data.frame(
+  "Value_1" = c(                                          # 1st die
+    rep(1, 400),
+    rep(2, 400),
+    rep(3, 400),
+    rep(4, 400),
+    rep(5, 400),
+    rep(6, 400),
+    rep(7, 400),
+    rep(8, 400),
+    rep(9, 400),
+    rep(10, 400),
+    rep(11, 400),
+    rep(12, 400),
+    rep(13, 400),
+    rep(14, 400),
+    rep(15, 400),
+    rep(16, 400),
+    rep(17, 400),
+    rep(18, 400),
+    rep(19, 400),
+    rep(20, 400)
+  ),
+  "Value_2" = c(rep(                                      # 2nd die
+    c(
+      rep(1, 20),
+      rep(2, 20),
+      rep(3, 20),
+      rep(4, 20),
+      rep(5, 20),
+      rep(6, 20),
+      rep(7, 20),
+      rep(8, 20),
+      rep(9, 20),
+      rep(10, 20),
+      rep(11, 20),
+      rep(12, 20),
+      rep(13, 20),
+      rep(14, 20),
+      rep(15, 20),
+      rep(16, 20),
+      rep(17, 20),
+      rep(18, 20),
+      rep(19, 20),
+      rep(20, 20)
+    ),
+    20
+  )),
+  "Value_3" = c(rep(1:20, 400))                           # 3rd die
+)
+
+# probability table
+d20_3_pmf <- d20_3 %>%
+  rowwise() %>%                                           # needed for sort
+  mutate(
+    DropDie1 = sort(c(Value_1, Value_2, Value_3),         # sort die values
+                    decreasing = FALSE)[1],               # store lowest
+    DropDie2 = sort(c(Value_1, Value_2, Value_3), 
+                    decreasing = FALSE)[2],               # store 2nd lowest
+    Total = Value_1 + Value_2 + Value_3 - DropDie1 - DropDie2
+  ) %>%                                                   # add die values subtract lowest 2
+  group_by(Total) %>%                                     # group by resulting sum
+  summarise(Odds = n()) %>%                               # count result options
+  mutate(Probability = Odds / 8000) %>%                   # probability of result
+  select(-Odds)                                           # format
+
+# plot probability
+d20_3_plot <-
+  ggplot(data = d20_3_pmf, aes(x = Total, y = Probability)) +
+  geom_col(fill = "green4") +
+  ylim(c(0, .2))
+
+# view plots
+d6_6_plot / d10_4_plot / d20_3_plot
+```
+
+```{r define functions}
+
+# function to convert decimal to percent
+makePercent <- function(probability) {
+  percent <- probability*100
+  return(percent)
+}
+
+# function to give cumulative higher probability
+percentHigher <- function(percent) {
+  percentLess <-cumsum(percent) - percent                 # cumulative lower values - selected value
+  percentMore <- 1-percentLess                            # complement, includes selected value
+  return(percentMore)
+}
+
+```
+
+```{r final table}
+
+# desired value 1-20; roll at least this sum or higher
+lookup_base <- data.frame("Total" = c(1:20)) %>%
+  mutate("Total" = as.integer(Total))
+
+# left join columns with probability for each dice configuration
+lookup <- lookup_base %>%
+  left_join(d6_4_pmf, by = "Total") %>%
+  rename(Four_D6s = Probability) %>%
+  
+  left_join(d10_2_pmf, by = "Total") %>%
+  rename(Two_D10s = Probability) %>%
+  
+  left_join(d20_1_pmf, by = "Total") %>%
+  rename(One_D20 = Probability) %>%
+  
+  left_join(d6_5pmf, by = "Total") %>%
+  rename(Five_D6s = Probability) %>%
+  
+  left_join(d10_3_pmf, by = "Total") %>%
+  rename(Three_D10s = Probability) %>%
+  
+  left_join(d20_2_pmf, by = "Total") %>%
+  rename(Two_D20s = Probability) %>%
+  
+  left_join(d6_6pmf, by = "Total") %>%
+  rename(Six_D6s = Probability) %>%
+  
+  left_join(d10_4_pmf, by = "Total") %>%
+  rename(Four_D10s = Probability) %>%
+  
+  left_join(d20_3_pmf, by = "Total") %>%
+  rename(Three_D20s = Probability) %>%
+  
+  replace(is.na(.), values = 0) %>%
+  mutate(across(2:10, percentHigher)) %>%                  # percent higher or equal to value
+  mutate(across(2:10, makePercent))                        # view as percent
+
+# print table
+kable(lookup)
+
+# export as csv
+write.csv(lookup, "/Users/elizabethehmcke/Documents/Future GitHub/dice.csv", row.names = FALSE)
+```
